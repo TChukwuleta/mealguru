@@ -35,7 +35,7 @@ router.post(
 router.post("/login", [validate(authValidation.login)], authController.login);
 module.exports = router;
 
-router.get(
+router.post(
   "/account/confirm",
   [authService.validateToken],
   authController.emailVerification

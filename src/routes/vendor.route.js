@@ -19,6 +19,18 @@ router.post(
   "/uploads",
   authService.validateToken,
   VendorController.uploadImages
-);
+); 
+
+// VENDOR DASHBOARD
+router.get(
+  "/getorders/:limit",
+  authService.validateToken,
+  VendorController.getOrdersByVendor
+)
+router.get(
+  "getorderbyid/:orderid",
+  authService.validateToken,
+  VendorController.getVendorOrderById
+)
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const cloudinaryHelper = require("../helpers/cloudinary");
 const { vendorService } = require("../services");
-const { User } = require("../models");
+const { User, Order } = require("../models");
 const pick = require("../helpers/pick");
 const catchAsync = require("../helpers/catchAsync");
 
@@ -42,6 +42,38 @@ const uploadImages = catchAsync(async (req, res) => {
   });
 });
 
+const getOrdersByVendor = catchAsync(async (req, res) => {
+  const limit = req.params.limit
+  const orders = await vendorService.getOrdersByVendor(req.user._id, limit)
+  res.status(200).send({
+    message: "Orders retrieval per Vendor was successful",
+    data: orders
+  })
+})
+
+const getVendorOrderById = catchAsync(async (req, res) => {
+  const orderId = req.params.orderid
+  const order = await vendorService.getVendorOrderById(req.user._id, orderId)
+  res.status(200).send({
+    message: "Order retrieval by Id was successful",
+    data: order
+  })
+})
+
+const getVendorDashboardDetails = catchAsync(async (req, res) => {
+  const { vendorOrders, vendorDeliveriesCount, vendorPickupCount } = await vendorService.getVendorDashboardDetails(req.user._id)
+  const dashboardDetails = {
+    Orders: vendorOrders,
+    Deliveries: vendorDeliveriesCount,
+    PickUp: vendorPickupCount,
+    AsOf: new Date()
+  }
+  res.status(200).send({
+    message: "Retrieving vendor's dashboard details was successful",
+    data: dashboardDetails
+  })
+})
+
 const getVendors = catchAsync(async (req, res) => {
   // const filter = {pick(req.query, ["type"]);}
   const options = pick(req.query, ["sortBy", "limit", "page"]);
@@ -63,4 +95,6 @@ module.exports = {
   updateDetails,
   uploadImages,
   getVendors,
+  getOrdersByVendor,
+  getVendorOrderById
 };
