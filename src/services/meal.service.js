@@ -28,7 +28,9 @@ const createMeal = async (req, body, criteria, checkCriteria = true) => {
 };
 
 const processImages = async (req) => {
+  console.log(req.files)
   const result = await cloudinaryHelper.uploadImage(req.files.image);
+  console.log(result)
   return result.secure_url;
 };
 

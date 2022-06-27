@@ -6,4 +6,4 @@ const router = new express.Router();
 
 router.get("/", [authService.validateToken], SummaryController.preList);
 
-module.exports = router;
+module.exports = router; 
