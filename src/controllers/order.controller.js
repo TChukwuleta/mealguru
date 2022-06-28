@@ -14,7 +14,7 @@ const create = catchAsync(async function (req, res) {
     user: req.user._id,
     price: parseFloat(data.price),
   };
-
+ 
   const order = await orderService.createOrder(data);
   const purchase = await orderService.getOrderDetailsForEmail(order._id);
 
