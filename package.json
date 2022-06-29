@@ -38,6 +38,7 @@
     "path": "^0.12.7",
     "random-int": "^2.0.1",
     "randomstring": "^1.1.5",
+    "request": "^2.88.2",
     "slugify": "^1.4.5",
     "winston": "^3.3.3"
   },

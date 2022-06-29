@@ -19,8 +19,12 @@ var transactionSchema = new mongoose.Schema({
   },
   transactionStatus: {
     type: "string",
-    enum: ["INITIATED", "PROCESSING", "SUCCESS", "FAILED", "REVERSED", "CANCELLED"],
+    enum: ["INITIATED", "PROCESSING", "ABANDONED", "SUCCESS", "FAILED", "REVERSED", "CANCELLED"],
     default: "INITIATED",
+  },
+  transactionType: {
+    type: "string",
+    enum: ["CREDIT", "DEBIT"],
   },
   transactionReference: {
     type: String,
