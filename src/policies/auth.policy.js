@@ -32,7 +32,7 @@ const register = {
       "any.required": `Phone Number is a required field`,
     }),
     type: Joi.string()
-      .valid("ADMIN", "USER", "VENDOR", "SUPER_ADMIN")
+      .valid("ADMIN", "USER", "VENDOR", "VENDOR_ASSISTANT", "SUPER_ADMIN")
       .messages({
         "string.empty": `Type is a required field`,
         "any.only": `Invalid User type passed`,

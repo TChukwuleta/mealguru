@@ -30,8 +30,7 @@ const register = catchAsync(async function (req, res) {
 const registerVendorAssistant = catchAsync(async function (req, res) {
   const user = await authService.register({
     ...req.body,
-    type: "VENDOR_ASSISTANT",
-    vendor: req.vendor._id,
+    vendor: req.user._id,
   });
   const tokens = await tokenService.generateAuthTokens(user, true);
   emailHelper.sendRegister(user, tokens.emailToken.token);

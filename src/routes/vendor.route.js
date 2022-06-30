@@ -21,6 +21,18 @@ router.post(
   VendorController.uploadImages
 ); 
 
+router.get(
+  "/getvendordetails",
+  authService.validateToken,
+  VendorController.getVendorDetails
+); 
+
+router.get(
+  "/getvendorassistant",
+  authService.validateToken,
+  VendorController.getVendorAssistantByVendor
+); 
+
 // VENDOR DASHBOARD
 router.get(
   "/getorders/:limit",

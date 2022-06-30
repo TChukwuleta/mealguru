@@ -45,6 +45,10 @@ const getVendorOrderById = async (userId, orderId) => {
   return order
 }
 
+const getVendorAssistantByVendor = async (vendorId) => {
+  const vendorAssistant = await Vendor.find({ _id: vendorId })
+}
+
 const vendorDashboardCards = async (userId) => {
   const vendorOrder = await Order.find({ vendor: userId })
   if(!vendorOrder){

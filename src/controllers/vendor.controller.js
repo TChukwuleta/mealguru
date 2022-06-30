@@ -1,6 +1,7 @@
 const cloudinaryHelper = require("../helpers/cloudinary");
 const { vendorService } = require("../services");
-const { User, Order } = require("../models");
+const ApiError = require("../helpers/ApiError");
+const { User, Order, Vendor } = require("../models");
 const pick = require("../helpers/pick");
 const catchAsync = require("../helpers/catchAsync");
 
@@ -42,12 +43,34 @@ const uploadImages = catchAsync(async (req, res) => {
   });
 });
 
+
+const getVendorDetails = catchAsync(async (req, res) => {
+  const vendor = await Vendor.findOne({ user: req.user._id })
+  if(!vendor){
+    throw new ApiError(400, "No vendor details found");
+  }
+  res.status(200).send({
+    message: "Vendor retrieval was successful",
+    data: vendor
+  })
+}) 
+
 const getOrdersByVendor = catchAsync(async (req, res) => {
   const limit = req.params.limit
   const orders = await vendorService.getOrdersByVendor(req.user._id, limit)
   res.status(200).send({
     message: "Orders retrieval per Vendor was successful",
     data: orders
+  })
+})
+
+const getVendorAssistantByVendor = catchAsync(async (req, res) => {
+  const vendorId = req.user._id
+  const vendorAssistants = await User.find({ vendor: vendorId })
+  if(!vendorAssistants)throw new ApiError(400, "No vendor details found");
+  res.status(200).send({
+    message: "Vendor assistant retrieval was successful",
+    data: vendorAssistants
   })
 })
 
@@ -96,5 +119,7 @@ module.exports = {
   uploadImages,
   getVendors,
   getOrdersByVendor,
-  getVendorOrderById
+  getVendorOrderById,
+  getVendorDetails,
+  getVendorAssistantByVendor
 };

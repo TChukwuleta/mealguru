@@ -13,7 +13,7 @@ const register = async (data) => {
     let user = await User.findOne({ email: data.email });
     if (user) {
       const err = {
-        code: 400,
+        code: 400, 
         message: "User with that email already exists",
       };
       throw err;

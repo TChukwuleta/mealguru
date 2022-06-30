@@ -109,7 +109,7 @@ const listOne = catchAsync(async function (req, res) {
     status: "success",
     message: "Menu fetched Successfully",
     data: {
-      ...data,
+      ...data, 
     },
   });
 });

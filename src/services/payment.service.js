@@ -65,7 +65,7 @@ const paystackPayment = async (body) => {
     }
 }
 
-const paystackVerify = (txref) => {
+const paystackVerify = async (txref) => {
     const existingTransaction = await transactionService.findOne({ transactionReference: txref })
     if(!existingTransaction) throw new ApiError(400, "Transaction with that reference does not exist")
     const options = {
