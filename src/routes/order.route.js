@@ -18,5 +18,6 @@ router.put(
 );
 router.get("/list/all", [authService.validateToken], OrderController.preList);
 router.get("/:_id", [authService.validateToken], OrderController.listOne);
+router.get("/getbycode/:code", [authService.validateToken], OrderController.getByCode);
 
 module.exports = router;

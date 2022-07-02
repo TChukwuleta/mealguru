@@ -4,9 +4,10 @@ const emailHelper = require("../helpers/email");
 const { EMAIL_CONTENT, EMAIL_HEADER } = require("../helpers/messages.js");
 const slugify = require("slugify");
 
-const createOrder = async (body) => {
+const createOrder = async (data) => {
   try {
     const order = await Order.create(data);
+    console.log(order)
     return JSON.parse(JSON.stringify(order));
   } catch (error) {
     throw new ApiError(error.code || 500, error.message || error);
@@ -53,6 +54,21 @@ const findOne = async (criteria) => {
       })
       .populate("user", "fullName phoneNumber email")
       .populate("vendor", "fullName phoneNumber email");
+    return JSON.parse(JSON.stringify(order));
+  } catch (error) {
+    throw new ApiError(error.code || 500, error.message || error);
+  }
+};
+
+const findByCode = async (criteria) => {
+  try {
+    const order = await Order.findOne({ ...criteria })
+      .populate({
+        path: "meals.meal",
+        model: "Meal",
+        select: "name image price description",
+      })
+      .populate("user", "fullName phoneNumber email")
     return JSON.parse(JSON.stringify(order));
   } catch (error) {
     throw new ApiError(error.code || 500, error.message || error);
@@ -162,6 +178,7 @@ module.exports = {
   processCoupon,
   count,
   findOne,
+  findByCode,
   fetchOrders,
   updateOrder,
 };

@@ -7,14 +7,14 @@ const validate = require("../helpers/validate");
 const router = new express.Router();
 
 router.post(
-  "/pay",
+  "/createpayment",
   [authService.validateToken, validate(PaymentPolicies.create)],
   PaymentController.pay
 );
-router.put(
+router.post(
   "/verifypayment",
   [authService.validateToken, validate(PaymentPolicies.verify)],
-  PaymentController.pay
+  PaymentController.verifyPayment
 );
 
 module.exports = router;

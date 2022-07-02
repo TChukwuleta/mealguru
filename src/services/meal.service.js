@@ -37,8 +37,9 @@ const processImages = async (req) => {
 const findOne = async (criteria) => {
   try {
     const meal = await Meal.findOne({ ...criteria });
+    console.log(meal)
     const coupon = await Coupon.find({ meal });
-    const data = { meal, coupon };
+    const data = { meal, coupon }; 
     return JSON.parse(JSON.stringify(data));
   } catch (error) {
     throw new ApiError(error.code || 500, error.message || error);

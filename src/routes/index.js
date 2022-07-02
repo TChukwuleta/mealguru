@@ -11,6 +11,8 @@ const couponRouter = require("./coupon.route.js");
 const summaryRouter = require("./summary.route.js");
 const menuRouter = require("./menu.route.js");
 const authRouter = require("./auth.route.js");
+const paymentRouter = require("./payment.route")
+const TransactionRouter = require("./transaction.route")
 router.post("/upload/files", authController.uploadImages);
 router.use("/user", userRouter);
 router.use("/vendor", vendorRouter);
@@ -21,4 +23,6 @@ router.use("/order", orderRouter);
 router.use("/coupon", couponRouter);
 router.use("/summary", summaryRouter);
 router.use("/auth", authRouter);
+router.use("/pay", paymentRouter)
+router.use("/txn", TransactionRouter)
 module.exports = router;

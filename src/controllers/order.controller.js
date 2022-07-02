@@ -12,8 +12,8 @@ const create = catchAsync(async function (req, res) {
     ...req.body,
     code: `${randomstring.generate(6)}`,
     user: req.user._id,
-    price: parseFloat(data.price),
-  };
+  }; 
+  data.price = parseFloat(data.price)
  
   const order = await orderService.createOrder(data);
   const purchase = await orderService.getOrderDetailsForEmail(order._id);
@@ -24,13 +24,15 @@ const create = catchAsync(async function (req, res) {
     vendor,
     purchase,
     order.price,
-    vendor.restaurant.name
+    //vendor.restaurant.name
+    "Ore Stores"
   );
-  emailHelper.sendUserPurchase(req.user, purchase, vendor.restaurant.name);
+  emailHelper.sendUserPurchase(req.user, purchase, "Ore stores"); // vendor.restaurant.name
 
   const meals = req.body.meals;
   await meals.map(async (meal) => {
     let ml = await mealService.findOne(meal);
+    console.log(ml)
     ml.orderCount++;
     await ml.save();
     return ml;
@@ -66,6 +68,20 @@ const listOne = catchAsync(async function (req, res) {
     },
   });
 });
+
+const getByCode = catchAsync(async function(req, res) {
+  const order = await orderService.findByCode({ code: req.params.code })
+  if(!order){
+    throw new ApiError(400, "Order not found")
+  }
+  res.status(200).send({
+    status: "success",
+    message: "Order fetched Successfully",
+    data: {
+      order,
+    },
+  });
+})
 
 const preList = catchAsync(async function (req, res) {
   const filter = pick(req.query, ["type", "status"]);
@@ -149,4 +165,5 @@ module.exports = {
   updateStatus,
   list,
   preList,
+  getByCode
 };

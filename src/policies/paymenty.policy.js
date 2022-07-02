@@ -10,7 +10,7 @@ const create = {
       "string.empty": `Order code cannot be an empty field`,
       "any.required": `Order code is a required field`,
     }),
-    amount: Joi.string().required().messages({
+    amount: Joi.required().messages({
       "string.empty": `Amount cannot be an empty field`,
       "any.required": `Amount is a required field`,
     })
