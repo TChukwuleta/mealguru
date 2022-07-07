@@ -68,7 +68,7 @@ const updateMenu = async (menuId, req) => {
   const data = req.body;
   data.slug = slugify(data.name, { lower: true });
 
-  Object.assign(menu, data);
+  Object.assign(menu, data); 
   await menu.save();
   return menu;
 };

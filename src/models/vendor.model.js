@@ -49,6 +49,9 @@ var vendorSchema = new mongoose.Schema(
       bankName: {
         type: String,
       },
+      paystackRecipientCode: {
+        type: String
+      }
     },
     isDeleted: {
       type: Boolean,

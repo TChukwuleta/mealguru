@@ -1,6 +1,7 @@
 const { Order, Vendor, Transaction, User } = require('../models')
 const { orderService } = require('./index')
 const transactionService = require("./transaction.service")
+const bankService = require('./bank.service')
 const ApiError = require("../helpers/ApiError");
 const axios = require("axios")
 const _ = require("lodash")
@@ -39,7 +40,7 @@ const paystackPayment = async (body) => {
         };
         form.amount *= 100
         let newTransaction;
-        const { data } = await axios.post(`${process.env.PAYSTACK_INITIALIZE}`, form, {
+        const { data } = await axios.post(`${process.env.PAYSTACK_URL}/transaction/initialize`, form, {
             headers: {
                 'content-type': 'application/json',
                 authorization: `Bearer ${process.env.PAYSTACK_SK}`
@@ -66,7 +67,7 @@ const paystackPayment = async (body) => {
 const paystackVerify = async (txref) => {
     const existingTransaction = await transactionService.findTransaction({ transactionReference: txref })
     if(!existingTransaction) throw new ApiError(400, "Transaction with that reference does not exist")
-    const url = `${process.env.PAYSTACK_VERIFY}` + encodeURIComponent(txref)
+    const url = `${process.env.PAYSTACK_URL}/transaction/verify/` + encodeURIComponent(txref)
     const { data } = await axios.get(url, {
         headers: {
             'content-type': 'application/json',
@@ -90,6 +91,29 @@ const paystackVerify = async (txref) => {
             await transactionService.updateTransaction({ transactionReference: txref }, "SUCCESS")
       }
     return data
+}
+
+const vendorWithdrawalWithPaystack = async (body) => {
+    const requestPayload = {
+        fullName: "",
+        currency: body.currency,
+        bankCode: body.bankCode,
+        accountNumber: body.accountNumber,
+        shouldSaveDetails: body.shouldSaveDetails
+    }
+    const response = await bankService.createPaystackCustomerForVendor(requestPayload)
+    const form = {
+        source: `${process.env.PAYSTACK_SK}`,
+        amount: (body.amount * 100),
+        currency: "NGN",
+        reason: `Vendor withdrawal `
+    }
+    const { data } = await axios.post(`${process.env.PAYSTACK_URL}/transfer`, form, {
+        headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${process.env.PAYSTACK_SK}`
+        }
+    });
 }
 
 
