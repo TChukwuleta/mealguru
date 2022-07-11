@@ -23,7 +23,7 @@ const setupRestaurant = catchAsync(async (req, res) => {
       user,
     },
   });
-});
+}); 
 
 const updateDetails = catchAsync(async (req, res) => {
   const accountInfo = { ...req.body };

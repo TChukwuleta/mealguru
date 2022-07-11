@@ -1,10 +1,12 @@
 const { Order, Vendor, Transaction, User } = require('../models')
-const { orderService } = require('./index')
+const { orderService, vendorService } = require('./index')
 const transactionService = require("./transaction.service")
 const bankService = require('./bank.service')
 const ApiError = require("../helpers/ApiError");
 const axios = require("axios")
 const _ = require("lodash")
+const urlParams = require('url')
+const qs = require('qs')
 const emailHelper = require("../helpers/email");
 const { EMAIL_CONTENT, EMAIL_HEADER } = require("../helpers/messages.js");
 
@@ -54,7 +56,7 @@ const paystackPayment = async (body) => {
                 transactionReference: reference,
                 transactionStatus: "PROCESSING",
                 transactionType: "CREDIT",
-                amount: parseFloat(body.amount).toFixed(2)
+                amount: parseInt(body.amount)
             })
         }
         return { data, newTransaction }
@@ -64,9 +66,15 @@ const paystackPayment = async (body) => {
     }
 }
 
-const paystackVerify = async (txref) => {
+const paystackVerify = async (txref, transactionType) => {
     const existingTransaction = await transactionService.findTransaction({ transactionReference: txref })
     if(!existingTransaction) throw new ApiError(400, "Transaction with that reference does not exist")
+    switch (transactionType) {
+        case "transfer":
+            await transactionService.updateTransaction({ transactionReference: txref }, "SUCCESS")
+        case "transaction":
+            await transactionService.updateTransaction({ transactionReference: txref }, "SUCCESS")
+    }
     const url = `${process.env.PAYSTACK_URL}/transaction/verify/` + encodeURIComponent(txref)
     const { data } = await axios.get(url, {
         headers: {
@@ -79,7 +87,7 @@ const paystackVerify = async (txref) => {
         throw new ApiError(400, "An error occured with this transaction. Please contact support")
     }
 
-    console.log(data.data.status)
+    console.log(data.data.status) 
     switch (data.data.status) {
         case "processing":
             await transactionService.updateTransaction({ transactionReference: txref }, "PROCESSING")
@@ -89,35 +97,95 @@ const paystackVerify = async (txref) => {
             throw new ApiError(400, "Your transaction is not yet complete")
         case "success":
             await transactionService.updateTransaction({ transactionReference: txref }, "SUCCESS")
-      }
+    }
     return data
 }
 
 const vendorWithdrawalWithPaystack = async (body) => {
+    const vendorUser = await User.findOne({ _id: body.userId })
+    if(!vendorUser) throw new ApiError(400, "Invalid user details")
+    const vendor = await vendorService.getVendorByUserId(body.userId)
+    if(!vendor) throw new ApiError(400, "Vendor does not exist")
     const requestPayload = {
-        fullName: "",
-        currency: body.currency,
+        fullName: vendorUser.fullName,
         bankCode: body.bankCode,
         accountNumber: body.accountNumber,
-        shouldSaveDetails: body.shouldSaveDetails
+        shouldSaveDetails: body.shouldSaveDetails,
+        userId: body.userId
     }
-    const response = await bankService.createPaystackCustomerForVendor(requestPayload)
+    const response = await createPaystackCustomerForVendor(requestPayload)
+    console.log(response.data.recipient_code) 
     const form = {
-        source: `${process.env.PAYSTACK_SK}`,
+        source: 'balance',
+        recipient: response.data.recipient_code,
         amount: (body.amount * 100),
         currency: "NGN",
-        reason: `Vendor withdrawal `
+        reason: `Vendor withdrawal`  
     }
-    const { data } = await axios.post(`${process.env.PAYSTACK_URL}/transfer`, form, {
+    console.log(form)
+    const { data } = await axios.post(`${process.env.PAYSTACK_URL}/transfer`, qs.stringify(form), {
         headers: {
-            'content-type': 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
             authorization: `Bearer ${process.env.PAYSTACK_SK}`
         }
     });
+    console.log(`Second ${data}`) 
+    if(data.status){
+        newTransaction = await Transaction.create({
+            vendor: vendor._id,
+            user: vendor.user,
+            transactionReference: data.data.reference,
+            transactionStatus: data.data.status = "success" ? "SUCCESS" : "PROCESSING",
+            transactionType: "DEBIT",
+            amount: parseInt(body.amount)
+        })
+    }
+    return { data, newTransaction }
+}
+
+
+const createPaystackCustomerForVendor = async (body) => {
+    const paystackBody = {
+        type: "nuban",
+        name: body.fullName,
+        account_number: body.accountNumber,
+        bank_code: body.bankCode,
+        currency: "NGN",
+    }  
+    const { data } = await axios.post(`${process.env.PAYSTACK_URL}/transferrecipient`, qs.stringify(paystackBody), {
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            authorization: `Bearer ${process.env.PAYSTACK_SK}`
+        }
+    });
+    console.log("Point A")
+    if(body.shouldSaveDetails){
+        const details = {
+            accountNumber: body.accountNumber,
+            bankCode: body.bankCode,
+            bankName: body.bankName,
+            recipientCode: data.data.recipient_code,
+            userId: body.userId
+        }
+        await saveVendorBankDetails(details)
+    }
+    console.log("Point B")
+    return data
+}
+
+const saveVendorBankDetails = async (body) => {
+    const accountInfo = {
+        accountNum: body.accountNumber,
+        bankCode: body.bankCode,
+        bankName: body.bankName,
+        paystackRecipientCode: body.recipientCode
+    }
+    const saveVendorsDetails = await vendorService.updateVendorByUserId(body.userId, { accountInfo })
 }
 
 
 module.exports = {
     paymentPlatform,
-    paystackVerify
+    paystackVerify,
+    vendorWithdrawalWithPaystack
 }

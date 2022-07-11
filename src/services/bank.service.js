@@ -15,19 +15,19 @@ const getBanks = async () => {
 
 const createPaystackCustomerForVendor = async (body) => {
     const paystackBody = {
+        type: "nuban",
         name: body.fullName,
         account_number: body.accountNumber,
-        currency: body.currency,
         bank_code: body.bankCode,
-        type: "nuban"
+        currency: "NGN"
     }
-    const { data } = await axios.get(`${process.env.PAYSTACK_URL}/transferrecipient`, paystackBody, {
+    const { data } = await axios.post(`${process.env.PAYSTACK_URL}/transferrecipient`, paystackBody, {
         headers: {
             'content-type': 'application/json',
             authorization: `Bearer ${process.env.PAYSTACK_SK}`
         }
     });
-
+    console.log(data)  
     if(body.shouldSaveDetails){
         const details = {
             accountNumber: body.accountNumber,

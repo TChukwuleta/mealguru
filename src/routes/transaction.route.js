@@ -44,5 +44,17 @@ router.get(
     TransactionController.findTransactionByReference
 );
 
+router.get(
+    "/totalbalanceforallvendors",
+    [authService.validateToken],
+    TransactionController.totalMoneyForVendors
+);
+
+router.get(
+    "/vendorbalance",
+    [authService.validateToken],
+    TransactionController.totalMoneyPerVendors
+);
+
 
 module.exports = router;

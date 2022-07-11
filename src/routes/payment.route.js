@@ -11,10 +11,22 @@ router.post(
   [authService.validateToken, validate(PaymentPolicies.create)],
   PaymentController.pay
 );
+
+router.post(
+  "/withdrawmoney",
+  [authService.validateToken, validate(PaymentPolicies.withdraw)],
+  PaymentController.withdrawMoney
+);
+
 router.post(
   "/verifypayment",
   [authService.validateToken, validate(PaymentPolicies.verify)],
   PaymentController.verifyPayment
+);
+
+router.get(
+  "/getbanks",
+  PaymentController.getBanks
 );
 
 module.exports = router;

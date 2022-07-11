@@ -32,9 +32,8 @@ var transactionSchema = new mongoose.Schema({
     trim: true,
   },
   amount: {
-    type: String,
-    required: true,
-    trim: true,
+    type: Number,
+    required: true
   },
   TransactionDate: {
     type: String,

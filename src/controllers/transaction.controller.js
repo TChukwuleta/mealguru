@@ -68,6 +68,28 @@ const findTransactionById = catchAsync(async function (req, res) {
     });
 });
 
+const totalMoneyForVendors = catchAsync(async function (req, res) {
+  const moneySum = await transactionService.getVendorBalance()
+
+  res.status(201).send({
+    message: "Retrieving sum of money for all vendors was successfully",
+    data: {
+      moneySum
+    },
+  });
+});
+
+const totalMoneyPerVendors = catchAsync(async function (req, res) {
+  const moneySum = await transactionService.getVendorBalance({ vendor: req.user._id })
+
+  res.status(201).send({
+    message: "Retrieving sum of money for a single vendor was successfully",
+    data: {
+      moneySum
+    },
+  });
+});
+
 
 module.exports = {
     allTransactions,
@@ -75,5 +97,7 @@ module.exports = {
     allSuccessfulTransactionsPerVendor,
     allSuccessfulTransactions,
     findTransactionById,
-    findTransactionByReference
+    findTransactionByReference,
+    totalMoneyForVendors,
+    totalMoneyPerVendors
 }

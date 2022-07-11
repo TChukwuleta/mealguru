@@ -9,17 +9,29 @@ const findOneTransaction = async (ref) => {
   } catch (error) {
     throw new ApiError(error.code || 500, error.message || error);
   }
-};
+}; 
 
 const findTransaction = async (criteria = {}) => {
   try {
     const transactions = await Transaction.find({ ...criteria })
-    if(!transactions) throw new ApiError(400, "No transaction found");
+    if(!transactions) throw new ApiError(400, "No transactions found");
     return JSON.parse(JSON.stringify(transactions));
   } catch (error) {
     throw new ApiError(error.code || 500, error.message || error);
   }
 }
+
+const getVendorBalance = async (criteria = {}) => {
+  try {
+    const transactions = await Transaction.find({ ...criteria })
+    if(!transactions) throw new ApiError(400, "No transactions found");
+    return Transaction.aggregate([
+      {$group: {_id:"$transactionType", count:{$sum:"$amount"}}}
+    ])
+  } catch (error) {
+    throw new ApiError(error.code || 500, error.message || error);
+  }
+} 
 
 const count = async (criteria = {}) => {
   return await Order.find(criteria).countDocuments();
@@ -63,5 +75,6 @@ module.exports = {
   count,
   findOneTransaction,
   updateTransaction,
-  findTransaction
+  findTransaction,
+  getVendorBalance
 };
